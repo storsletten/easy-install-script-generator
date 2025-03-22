@@ -1,4 +1,4 @@
-# Easy Winget Script Generator
+# Easy Install Script Generator
 
 The goal of this project is to make it easy and convenient for any user to install/update popular apps on modern versions of Windows.
 
