@@ -410,7 +410,7 @@ function makeCmdScript({
  if (title) lines.push(`title ${title}`);
  if (elevate) lines.push(`net file >nul 2>&1 || (powershell -NoProfile -ExecutionPolicy Unrestricted -Command "Start-Process -Verb RunAs -FilePath '%ComSpec%' -ArgumentList '/c \\"%~f0\\"'" & exit /b)`);
  lines.push(...commands);
- if (pauseBeforeExit) lines.push(`echo.`, `(<nul set /p=Press any key to close this window.) & (pause >nul)`);
+ if (pauseBeforeExit) lines.push(`echo.`, `set /p dummy=Press the Enter key to close this window. `);
 
  link.href = `data:text/plain;charset=utf-8,${encodeURIComponent(lines.join(eol) + eol)}`;
  link.download = filename;
