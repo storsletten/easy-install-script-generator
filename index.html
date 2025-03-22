@@ -5,7 +5,7 @@
 <title>Easy Install Script Generator</title>
 <meta name="application-name" content="Easy Install Script Generator">
 <meta name="version" content="1.0.0">
-<meta name="description" content="User-friendly script generator for installing/updating apps on Windows using the winget package manager">
+<meta name="description" content="This is a user-friendly script generator for installing/updating apps on Windows using the winget package manager.">
 <meta name="keywords" content="Windows, programs, winget">
 <meta name="author" content="Martin Storsletten">
 <meta name="license" content="https://www.gnu.org/licenses/gpl-3.0.html">
@@ -20,6 +20,7 @@
 <dialog id="about-dialog">
 <h1 id="about-heading">About</h1>
 <p id="about"></p>
+<p id="about-description"></p>
 <form method="dialog">
 <button>OK</button>
 </form>
@@ -498,6 +499,7 @@ document.getElementById('about').innerHTML = `
   </dd></div>
  </dl>
 `;
+document.getElementById('about-description').textContent = metadata.description;
 
 document.getElementById('about-button').addEventListener('click', event => {
  aboutDialog.showModal();
