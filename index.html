@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Easy Winget Script Generator</title>
+<meta name="application-name" content="Easy Winget Script Generator">
+<meta name="version" content="1.0.0">
+<meta name="description" content="User-friendly script generator for installing/updating apps on Windows using the winget package manager">
+<meta name="keywords" content="Windows, programs, winget">
+<meta name="author" content="Martin Storsletten">
+<meta name="license" content="https://www.gnu.org/licenses/gpl-3.0.html">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+<h1>Easy Winget Script Generator</h1>
+
+<div id="about-container">
+<button id="about-button" type="button">About</button>
+<dialog id="about-dialog">
+<h1 id="about-heading">About</h1>
+<p id="about"></p>
+<form method="dialog">
+<button>OK</button>
+</form>
+</dialog>
+</div>
+
+
+<section aria-labelledby="apps-heading" id="apps-section">
+<h2 id="apps-heading">Apps (<span id="apps-counter" aria-live="polite">0 of 0 selected</span>)</h2>
+<form id="apps"></form>
+</section>
+<hr>
+
+<section aria-labelledby="options-heading" id="options-section">
+<h2 id="options-heading">Options</h2>
+<form id="options">
+<div class="option container">
+<input checked id="option__Elevate" type="checkbox">
+<label for="option__Elevate">Elevate Script Execution to Admin Privileges at the Beginning</label>
+</div>
+
+<div class="option container">
+<input checked id="option__PauseBeforeExit" type="checkbox">
+<label for="option__PauseBeforeExit">Pause Before the Script Execution Window Closes</label>
+</div>
+</form>
+</section>
+<hr>
+
+<section aria-labelledby="generators-heading" id="generators-section">
+<h2 id="generators-heading">Make Script</h2>
+<div id="generators">
+<div class="generator container">
+<button accesskey="i" id="generator__InstallSelectedApps" type="button">Install Selected Apps (0)</button>
+</div>
+
+<div class="generator container">
+<button accesskey="u" id="generator__UpdateAllApps" type="button">Update All Installed Apps</button>
+</div>
+</div>
+</section>
+
+
+<script>
+const aboutDialog = document.getElementById('about-dialog');
+const appsCounter = document.getElementById('apps-counter');
+const appsForm = document.getElementById('apps');
+const optionsForm = document.getElementById('options');
+const elevateCheckbox = document.getElementById('option__Elevate');
+const pauseBeforeExitCheckbox = document.getElementById('option__PauseBeforeExit');
+const installSelectedAppsButton = document.getElementById('generator__InstallSelectedApps');
+const updateAllAppsButton = document.getElementById('generator__UpdateAllApps');
+
+const appCounters = [appsCounter, installSelectedAppsButton];
+
+const apps = Object.freeze([
+ {
+  title: '7-Zip',
+  description: `Compression Utility`,
+  id: '7zip.7zip',
+ },
+ {
+  title: 'Acrobat Reader',
+  description: `PDF Reader by Adobe`,
+  id: 'Adobe.Acrobat.Reader.64-bit',
+ },
+ {
+  title: 'Armoury Crate',
+  description: `Hardware Management Utility by ASUS`,
+  id: 'Asus.ArmouryCrate',
+ },
+ {
+  title: 'AutoIt',
+  description: `Scripting Language`,
+  id: 'AutoIt.AutoIt',
+ },
+ {
+  title: 'Chrome',
+  description: `Web Browser by Google`,
+  id: 'Google.Chrome',
+ },
+ {
+  title: 'Discord',
+  description: `Communication App`,
+  id: 'Discord.Discord',
+ },
+ {
+  title: 'Dropbox',
+  description: `Cloud Storage`,
+  id: 'Dropbox.Dropbox',
+ },
+ {
+  title: 'Edge',
+  description: `Web Browser by Microsoft`,
+  id: 'Microsoft.Edge',
+ },
+ {
+  title: 'Firefox',
+  description: `Web Browser by Mozilla`,
+  id: 'Mozilla.Firefox',
+ },
+ {
+  title: 'Foobar2000',
+  description: `Media Player`,
+  id: 'PeterPawlowski.foobar2000',
+ },
+ {
+  title: 'Git',
+  description: `Distributed Version Control System`,
+  id: 'Git.Git',
+ },
+ {
+  title: 'GoldWave',
+  description: `Audio Editing`,
+  id: 'GoldWave.GoldWave',
+ },
+ {
+  title: 'Google Drive',
+  description: `Cloud Storage`,
+  id: 'Google.GoogleDrive',
+ },
+ {
+  title: 'iTunes',
+  description: `Media Player and Apple Devices Utility`,
+  id: 'Apple.iTunes',
+ },
+ {
+  title: 'Java 8',
+  description: `Eclipse Temurin Java Runtime Environment`,
+  id: 'EclipseAdoptium.Temurin.8.JRE',
+ },
+ {
+  title: 'Java 11',
+  description: `Eclipse Temurin Java Runtime Environment`,
+  id: 'EclipseAdoptium.Temurin.11.JRE',
+ },
+ {
+  title: 'Java 17',
+  description: `Eclipse Temurin Java Runtime Environment`,
+  id: 'EclipseAdoptium.Temurin.17.JRE',
+ },
+ {
+  title: 'Java 21',
+  description: `Eclipse Temurin Java Runtime Environment`,
+  id: 'EclipseAdoptium.Temurin.21.JRE',
+ },
+ {
+  title: 'Java 23',
+  description: `Eclipse Temurin Java Runtime Environment`,
+  id: 'EclipseAdoptium.Temurin.23.JRE',
+ },
+ {
+  title: 'JDK 23',
+  description: `Eclipse Temurin Java Development Kit`,
+  id: 'EclipseAdoptium.Temurin.23.JDK',
+ },
+ {
+  title: 'LibreOffice',
+  description: `Office Suite`,
+  id: 'TheDocumentFoundation.LibreOffice',
+ },
+ {
+  title: 'Logi Options+',
+  description: `Logitech Device Management`,
+  id: 'Logitech.OptionsPlus',
+ },
+ {
+  title: 'LogiTune',
+  description: `Logitech Web Camera Tuning`,
+  id: 'Logitech.LogiTune',
+ },
+ {
+  title: 'Mp3tag',
+  description: `Audio File Metadata Editor`,
+  id: 'FlorianHeidenreich.Mp3tag',
+ },
+ {
+  title: '.NET 5',
+  description: `Desktop Runtime by Microsoft`,
+  id: 'Microsoft.DotNet.DesktopRuntime.5',
+ },
+ {
+  title: '.NET 6',
+  description: `Desktop Runtime by Microsoft`,
+  id: 'Microsoft.DotNet.DesktopRuntime.6',
+ },
+ {
+  title: '.NET 7',
+  description: `Desktop Runtime by Microsoft`,
+  id: 'Microsoft.DotNet.DesktopRuntime.7',
+ },
+ {
+  title: '.NET 8',
+  description: `Desktop Runtime by Microsoft`,
+  id: 'Microsoft.DotNet.DesktopRuntime.8',
+ },
+ {
+  title: '.NET 9',
+  description: `Desktop Runtime by Microsoft`,
+  id: 'Microsoft.DotNet.DesktopRuntime.9',
+ },
+ {
+  title: 'NodeJS',
+  description: `JavaScript Runtime Environment`,
+  id: 'OpenJS.NodeJS',
+ },
+ {
+  title: 'Notepad++',
+  description: `Text Editor`,
+  id: 'Notepad++.Notepad++',
+ },
+ {
+  title: 'NVDA',
+  description: `Screen Reader`,
+  id: 'NVAccess.NVDA',
+ },
+ {
+  title: 'NZXT CAM',
+  description: `Hardware Monitoring and Configuration`,
+  id: 'NZXT.CAM',
+ },
+ {
+  title: 'OCCT',
+  description: `Stress-test, Benchmark, and Monitor Utility by OCBase`,
+  id: 'OCBase.OCCT.Personal',
+ },
+ {
+  title: 'OpenOffice',
+  description: `Office Suite by Apache`,
+  id: 'Apache.OpenOffice',
+ },
+ {
+  title: 'OpenVPN',
+  description: `VPN Utility`,
+  id: 'OpenVPNTechnologies.OpenVPN',
+ },
+ {
+  title: 'Opera',
+  description: `Web Browser`,
+  id: 'Opera.Opera',
+ },
+ {
+  title: 'PowerShell',
+  description: `Scripting Language by Microsoft`,
+  id: 'Microsoft.PowerShell',
+ },
+ {
+  title: 'PowerToys',
+  description: `Windows Customization Utility by Microsoft`,
+  id: 'Microsoft.PowerToys',
+ },
+ {
+  title: 'Python',
+  description: `Programming Language`,
+  id: 'Python.Python.3.13',
+ },
+ {
+  title: 'SharpKeys',
+  description: `Key Remapping Utility`,
+  id: 'RandyRants.SharpKeys',
+ },
+ {
+  title: 'Slack',
+  description: `Communication App`,
+  id: 'SlackTechnologies.Slack',
+ },
+ {
+  title: 'Sonos',
+  description: `Controller`,
+  id: 'Sonos.Controller',
+ },
+ {
+  title: 'Spotify',
+  description: `Music Subscription`,
+  id: 'Spotify.Spotify',
+ },
+ {
+  title: 'Steam',
+  description: `Gaming Platform by Valve`,
+  id: 'Valve.Steam',
+ },
+ {
+  title: 'Teams',
+  description: `Conferencing App by Microsoft`,
+  id: 'Microsoft.Teams',
+ },
+ {
+  title: 'TeamTalk',
+  description: `Conferencing App by BearWare`,
+  id: 'BearWare.dk.TeamTalk5',
+ },
+ {
+  title: 'TeamViewer',
+  description: `Remote Access Utility`,
+  id: 'TeamViewer.TeamViewer',
+ },
+ {
+  title: 'Terminal',
+  description: `Windows Terminal by Microsoft`,
+  id: 'Microsoft.WindowsTerminal',
+ },
+ {
+  title: 'Thunderbird',
+  description: `Email Client by Mozilla`,
+  id: 'Mozilla.Thunderbird',
+ },
+ {
+  title: 'Visual Studio Code',
+  description: `Programmer's Editor by Microsoft`,
+  id: 'Microsoft.VisualStudioCode',
+ },
+ {
+  title: 'VLC',
+  description: `Media Player`,
+  id: 'VideoLAN.VLC',
+ },
+ {
+  title: 'Winaero Tweaker',
+  description: `Configuration Utility for Windows`,
+  id: 'winaero.tweaker',
+ },
+ {
+  title: 'Winamp',
+  description: `Media Player`,
+  id: 'Winamp.Winamp',
+ },
+ {
+  title: 'Zoom Workplace',
+  description: `Conferencing App`,
+  id: 'Zoom.Zoom',
+ },
+]);
+
+const metadata = {};
+document.querySelectorAll('meta[name]').forEach(meta => {
+ metadata[meta.name] = meta.content;
+});
+
+
+function makeCmdScript({
+ title = 'Installer',
+ commands = [`echo I got nothing.`],
+ eol = "\r\n",
+ elevate = elevateCheckbox.checked,
+ pauseBeforeExit = pauseBeforeExitCheckbox.checked,
+ filename = `${title}.cmd`,
+}) {
+ const link = document.createElement('a');
+
+ const lines = [
+  `@echo off`,
+  `rem This script was generated on ${(new Date()).toUTCString()}, using:`,
+  `rem   ${metadata['application-name'] || document.title}`,
+  `rem   Version: ${metadata.version}`,
+  '',
+ ];
+ if (title) lines.push(`title ${title}`);
+ if (elevate) lines.push(`net file >nul 2>&1 || (powershell -NoProfile -ExecutionPolicy Unrestricted -Command "Start-Process -Verb RunAs -FilePath '%ComSpec%' -ArgumentList '/c \\"%~f0\\"'" & exit /b)`);
+ lines.push(...commands);
+ if (pauseBeforeExit) lines.push(`echo.`, `(<nul set /p=Press any key to close this window.) & (pause >nul)`);
+
+ link.href = `data:text/plain;charset=utf-8,${encodeURIComponent(lines.join(eol) + eol)}`;
+ link.download = filename;
+
+ document.body.appendChild(link);
+ link.click();
+ document.body.removeChild(link);
+}
+
+function updateSelectedAppsCounter() {
+ const selectedApps = apps.filter(app => app.checkbox.checked);
+ appCounters.forEach(el => {
+  el.textContent = el.textContent.replace(/\d+/, selectedApps.length);
+ });
+}
+
+appCounters.forEach(el => {
+ el.textContent = el.textContent.replace(/(?<=(\/\s*|\s+of\s+))\d+/gi, apps.length);
+});
+
+[appsForm, optionsForm].forEach(form => {
+ form.addEventListener('submit', event => {
+  event.preventDefault();
+ });
+});
+
+apps.forEach((app, index) => {
+ const container = document.createElement('div');
+ const checkbox = document.createElement('input');
+ const label = document.createElement('label');
+
+ container.classList.add('app', 'container');
+
+ checkbox.type = 'checkbox';
+ checkbox.id = `app__${app.id}`;
+ checkbox.addEventListener('change', event => {
+  updateSelectedAppsCounter();
+ });
+
+ label.htmlFor = checkbox.id;
+ label.textContent = `${app.title} - ${app.description}`;
+
+ container.append(checkbox, label);
+ appsForm.append(container);
+
+ app.index = index;
+ app.container = container;
+ app.checkbox = checkbox;
+ Object.freeze(app);
+});
+
+installSelectedAppsButton.addEventListener('click', event => {
+ const selectedApps = apps.filter(app => app.checkbox.checked);
+ if (selectedApps.length === 0) {
+  alert(`You must select one or more apps before you can make an installer.`);
+  return;
+ }
+
+ const commands = [];
+ const maxTitles = 3;
+ const descr = (
+  selectedApps.length === 1
+  ? selectedApps[0].title
+  : (
+   selectedApps.length === 2
+   ? `${selectedApps[0].title} and ${selectedApps[1].title}`
+   : (
+    selectedApps.length <= maxTitles
+    ? `${selectedApps.slice(0, -1).map(app => `${app.title}, `).join('')}and ${selectedApps[selectedApps.length - 1].title}`
+    : `${selectedApps.slice(0, maxTitles).map(app => `${app.title}, `).join('')}and ${selectedApps.length - maxTitles} more`
+   )
+  )
+ );
+
+ if (selectedApps.length <= 2) {
+  commands.push(`echo Installing ${selectedApps.map(app => app.title).join(' and ')} ...`);
+ } else {
+  commands.push(
+   `echo Installing ${selectedApps.length} apps:`,
+   ...(selectedApps.map((app, i) => `echo   ${i + 1}. ${app.title}`))
+  );
+ }
+
+ commands.push(
+  `echo.`,
+  `winget install ${selectedApps.map(app => app.id).join(' ')}`,
+ );
+
+ makeCmdScript({
+  title: `Install ${descr}`,
+  commands,
+ });
+});
+
+updateAllAppsButton.addEventListener('click', event => {
+ makeCmdScript({
+  title: `Update All Apps`,
+  commands: [
+   `echo Updating all apps...`,
+   `echo.`,
+   `winget upgrade --all`,
+  ],
+ });
+});
+
+updateSelectedAppsCounter();
+
+
+document.getElementById('about-heading').textContent = `About ${metadata['application-name']}`;
+document.getElementById('about').innerHTML = `
+ <dl>
+  <div><dt>Version</dt><dd>${metadata.version}</dd></div>
+  <div><dt>Author</dt><dd>${metadata.author}</dd></div>
+  <div><dt>License</dt><dd>
+   <a rel="license" href="${metadata.license}" target="_blank">${metadata.license}</a>
+  </dd></div>
+ </dl>
+`;
+
+document.getElementById('about-button').addEventListener('click', event => {
+ aboutDialog.showModal();
+ aboutDialog.querySelector('form button').focus();
+});
+</script>
+</body>
+</html>
