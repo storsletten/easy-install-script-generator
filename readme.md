@@ -8,14 +8,14 @@ The [Winget Package Manager](https://learn.microsoft.com/en-us/windows/package-m
 
 ## How to Install Apps
 
-1. Navigate to the [index.html](./index.html) web page in this repo.
+1. Navigate to the [index.html](https://storsletten.github.io/easy-winget-script-generator/) web page in this repo.
 2. On that page, select the app(s) you want to install/update, and click on the Install Selected Apps button at the bottom of the page.
 3. If needed, allow the generated .cmd file to be downloaded by your web browser.
 4. Run the generated .cmd file.
 
 ## How to Update All Apps
 
-1. Navigate to the [index.html](./index.html) web page in this repo.
+1. Navigate to the [index.html](https://storsletten.github.io/easy-winget-script-generator/) web page in this repo.
 2. Scroll to the bottom of that page and click on the Update All Installed Apps button.
 3. If needed, allow the generated .cmd file to be downloaded by your web browser.
 4. Run the generated script file called Update All Apps.cmd.
