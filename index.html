@@ -18,9 +18,9 @@
 
 <div id="about-container">
 <button id="about-button" type="button">About</button>
-<dialog id="about-dialog">
+<dialog aria-labelledby="about-heading" id="about-dialog">
 <h1 id="about-heading">About</h1>
-<p id="about"></p>
+<p id="about-details"></p>
 <p id="about-description"></p>
 <form method="dialog">
 <button>OK</button>
@@ -555,7 +555,7 @@ function removeSchemeFromURL(url) {
 }
 
 document.getElementById('about-heading').textContent = `About ${metadata['application-name']}`;
-document.getElementById('about').innerHTML = `
+document.getElementById('about-details').innerHTML = `
  <dl>
   <div><dt>Version</dt><dd>${metadata.version}</dd></div>
   <div><dt>Author</dt><dd>${metadata.author}</dd></div>
@@ -567,6 +567,7 @@ document.getElementById('about').innerHTML = `
   </dd></div>
  </dl>
 `;
+
 document.getElementById('about-description').textContent = metadata.description;
 
 document.getElementById('about-button').addEventListener('click', event => {
