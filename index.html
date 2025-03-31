@@ -8,7 +8,8 @@
 <meta name="description" content="This is a user-friendly script generator for installing/updating apps on Windows using the winget package manager.">
 <meta name="keywords" content="Windows, programs, winget">
 <meta name="author" content="Martin Storsletten">
-<meta name="license" content="https://www.gnu.org/licenses/gpl-3.0.html">
+<meta name="github" content="https://github.com/storsletten/easy-install-script-generator">
+<meta name="license" content="https://gnu.org/licenses/gpl-3.0.html">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -548,14 +549,21 @@ updateAllAppsButton.addEventListener('click', event => {
 
 updateSelectedAppsCounter();
 
+function removeSchemeFromURL(url) {
+ const i = url.indexOf('//');
+ return i === -1 ? url : url.slice(i + 2);
+}
 
 document.getElementById('about-heading').textContent = `About ${metadata['application-name']}`;
 document.getElementById('about').innerHTML = `
  <dl>
   <div><dt>Version</dt><dd>${metadata.version}</dd></div>
   <div><dt>Author</dt><dd>${metadata.author}</dd></div>
+  <div><dt>Repository</dt><dd>
+   <a target="_blank" rel="repository" href="${metadata.github}">${removeSchemeFromURL(metadata.github)}</a>
+  </dd></div>
   <div><dt>License</dt><dd>
-   <a rel="license" href="${metadata.license}" target="_blank">${metadata.license}</a>
+   <a target="_blank" rel="license" href="${metadata.license}">${removeSchemeFromURL(metadata.license)}</a>
   </dd></div>
  </dl>
 `;
