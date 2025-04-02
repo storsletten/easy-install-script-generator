@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Easy Install Script Generator</title>
 <meta name="application-name" content="Easy Install Script Generator">
-<meta name="version" content="1.0.0">
+<meta name="version" content="1.0.1">
 <meta name="description" content="This is a user-friendly script generator for installing/updating apps on Windows using the winget package manager.">
 <meta name="keywords" content="Windows, programs, winget">
 <meta name="author" content="Martin Storsletten">
@@ -439,7 +439,12 @@ function makeCmdScript({
   '',
  ];
  if (title) lines.push(`title ${title}`);
- if (elevate) lines.push(`net file >nul 2>&1 || (powershell -NoProfile -ExecutionPolicy Unrestricted -Command "Start-Process -Verb RunAs -FilePath '%ComSpec%' -ArgumentList '/c \\"%~f0\\"'" & exit /b)`);
+ if (elevate) lines.push(
+  `net file >nul 2>&1 || (`,
+  ` powershell -NoProfile -ExecutionPolicy Bypass -Command ^`,
+  `  "& {Start-Process -FilePath $env:ComSpec -Verb RunAs -ArgumentList @('/c', \\"\`\\"%~f0\`\\"\\")}" & exit /b`,
+  `)`,
+ );
  lines.push(...commands);
  if (pauseBeforeExit) lines.push(`echo.`, `set /p dummy=Press the Enter key to close this window. `);
 
